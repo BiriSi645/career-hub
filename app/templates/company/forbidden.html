@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="card p-4">
+      <h1 class="section-title">Recruiter access required</h1>
+      {% if current_user.has_role('recruiter') %}
+        <p>Your account does not have permission for this company page. Open your recruiter dashboard to see the companies you can access.</p>
+      {% else %}
+        <p>This page is for recruiters. Sign in with a recruiter account to open its company profile.</p>
+      {% endif %}
+      <div class="d-flex flex-wrap gap-2">
+        {% if current_user.has_role('admin') %}
+          <a class="btn btn-outline-secondary" href="{{ url_for('admin.companies') }}">Manage companies</a>
+        {% endif %}
+        {% if current_user.has_role('recruiter') %}
+          <a class="btn btn-outline-secondary" href="{{ url_for('company.dashboard') }}">Recruiter dashboard</a>
+        {% endif %}
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button class="btn btn-teal" name="switch_account" value="1">Switch account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

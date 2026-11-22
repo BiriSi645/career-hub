@@ -1,0 +1,30 @@
+﻿{% if applications %}
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Company</th>
+          <th>Status</th>
+          <th>Applied</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in applications %}
+          <tr>
+            <td>
+              <a href="{{ url_for('seeker.application_detail',application_id=a.id) }}">{{ a.job_title }}</a>
+            </td>
+            <td>{{ a.company_name }}</td>
+            <td>
+              <span class="badge badge-soft">{{ a.status|title }}</span>
+            </td>
+            <td>{{ a.applied_at.strftime('%d %b %Y') }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty">No applications yet. Your next opportunity is waiting.</div>
+{% endif %}

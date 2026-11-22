@@ -1,0 +1,9 @@
+Flask==3.1.2
+Flask-Login==0.6.3
+Flask-WTF==1.2.2
+psycopg[binary]==3.2.12
+python-dotenv==1.2.1
+email-validator==2.3.0
+vercel-blob==0.6.2
+tzdata
+

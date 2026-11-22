@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <h1 class="section-title">Notifications</h1>
+    <div class="list-group">
+      {% for notice in notices %}
+        <div class="list-group-item d-flex flex-wrap justify-content-between gap-2">
+          <div>
+            <strong>{{ notice.title }}</strong>
+            {% if not notice.is_read %}<span class="badge badge-soft">Unread</span>{% endif %}
+            <p class="mb-1">{{ notice.message }}</p>
+            <small>{{ (notice.created_at|local_time).strftime('%d %b %Y %H:%M') }}</small>
+            {% if notice.application_id %} · <a href="{{ url_for('seeker.application_detail', application_id=notice.application_id) }}">View application</a>{% endif %}
+          </div>
+          {% if not notice.is_read %}
+            <form method="post" action="{{ url_for('seeker.read_notification', notification_id=notice.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-sm btn-outline-secondary">Mark as read</button>
+            </form>
+          {% endif %}
+        </div>
+      {% else %}<p class="empty">No notifications yet.</p>{% endfor %}
+    </div>
+  </div>
+{% endblock %}

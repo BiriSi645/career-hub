@@ -1,0 +1,47 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="card p-4 mx-auto" style="max-width:700px">
+      <h1 class="section-title">{{ 'Edit company' if company else 'Create company' }}</h1>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input
+          class="form-control mb-2"
+          name="name"
+          value="{{ company.name if company else '' }}"
+          placeholder="Company name"
+          required
+        />
+        <input
+          class="form-control mb-2"
+          name="industry"
+          value="{{ (company.industry or '') if company else '' }}"
+          placeholder="Industry"
+        />
+        <textarea class="form-control mb-2" name="description" placeholder="Company overview">{{ (company.description or '') if company else '' }}</textarea>
+        <input
+          class="form-control mb-2"
+          name="website"
+          value="{{ (company.website or '') if company else '' }}"
+          placeholder="Website"
+        />
+        <div class="row">
+          <div class="col">
+            <input class="form-control" name="city" value="{{ (company.city or '') if company else '' }}" placeholder="City" />
+          </div>
+          <div class="col">
+            <input
+              class="form-control"
+              name="country"
+              value="{{ company.country if company else 'Türkiye' }}"
+              placeholder="Country"
+            />
+          </div>
+        </div>
+        <button class="btn btn-teal mt-3">Save company</button>
+        {% if company %}<a class="btn btn-outline-secondary mt-3" href="{{ url_for('company.company_profile', company_id=company.id) }}">Cancel</a>{% endif %}
+      </form>
+    </div>
+  </div>
+{% endblock %}

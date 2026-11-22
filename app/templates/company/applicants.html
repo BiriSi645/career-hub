@@ -1,0 +1,33 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <h1 class="section-title">Applicants · {{ job.title }}</h1>
+    <div class="card p-4">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Status</th>
+            <th>Applied</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in applications %}
+            <tr>
+              <td>
+                <a href="{{ url_for('company.applicant_detail',application_id=a.id) }}">{{ a.full_name }}</a>
+              </td>
+              <td>{{ a.status }}</td>
+              <td>{{ a.applied_at.strftime('%d %b %Y') }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3" class="empty">No applicants yet.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

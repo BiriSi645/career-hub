@@ -1,0 +1,43 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="d-flex justify-content-between">
+      <div>
+        <h1 class="section-title">Hello, {{ current_user.first_name }}</h1>
+        <p>Keep your job search moving.</p>
+      </div>
+      <div class="d-flex gap-2 align-self-center">
+        <a class="btn btn-outline-secondary" href="{{ url_for('seeker.saved') }}">Saved jobs</a>
+        <a class="btn btn-teal" href="{{ url_for('main.jobs') }}">Find jobs</a>
+      </div>
+    </div>
+    <div class="row g-3 mb-4">
+      <div class="col">
+        <div class="card p-4">
+          <div class="metric">{{ applications|length }}</div>
+          Applications
+        </div>
+      </div>
+      <div class="col">
+        <div class="card p-4">
+          <div class="metric">{{ counts.skills }}</div>
+          Skills
+        </div>
+      </div>
+      <div class="col">
+        <div class="card p-4">
+          <div class="metric">{{ counts.unread_notifications }}</div>
+          <a href="{{ url_for('seeker.notifications') }}">Unread alerts</a>
+        </div>
+      </div>
+    </div>
+    <div class="card p-4">
+      <div class="d-flex justify-content-between">
+        <h3>Recent applications</h3>
+        <a href="{{ url_for('seeker.profile') }}">Manage profile</a>
+      </div>
+      {% include 'seeker/_applications_table.html' %}
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,52 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <h1 class="section-title">User management</h1>
+    <div class="card p-4">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Roles</th>
+            <th>State</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+            <tr>
+              <td>
+                {{ u.full_name }}<br />
+                <small>{{ u.email }}</small>
+              </td>
+              <td>{{ u.role_names or '' }}</td>
+              <td>{{ 'Active' if u.is_active else 'Disabled' }}</td>
+              <td>
+                <form method="post" class="mb-2">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input type="hidden" name="user_id" value="{{ u.id }}" />
+                  <button class="btn btn-sm btn-outline-secondary">Toggle status</button>
+                </form>
+                <form
+                  method="post"
+                  action="{{ url_for('admin.user_roles',user_id=u.id) }}"
+                  class="input-group input-group-sm"
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <select name="role_id" class="form-select">
+                    {% for r in roles %}
+                      <option value="{{ r.id }}">{{ r.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <button name="action" value="add" class="btn btn-outline-success">+</button>
+                  <button name="action" value="remove" class="btn btn-outline-danger">−</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

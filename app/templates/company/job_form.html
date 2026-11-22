@@ -1,0 +1,73 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="card p-4 mx-auto" style="max-width:760px">
+      <h1 class="section-title">Publish a new role</h1>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <input class="form-control mb-2" name="title" placeholder="Job title" required />
+        <select class="form-select mb-2" name="category_id" required>
+          {% for c in categories %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+        <textarea class="form-control mb-2" rows="5" name="description" placeholder="Description" required></textarea>
+        <textarea class="form-control mb-2" name="requirements" placeholder="Requirements"></textarea>
+        <input class="form-control mb-2" name="location" placeholder="Location" required />
+        <div class="row mb-2">
+          <div class="col">
+            <select class="form-select" name="employment_type">
+              <option value="full_time">Full time</option>
+              <option value="part_time">Part time</option>
+              <option value="internship">Internship</option>
+              <option value="contract">Contract</option>
+            </select>
+          </div>
+          <div class="col">
+            <select class="form-select" name="workplace_type">
+              <option value="onsite">Onsite</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="remote">Remote</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <input class="form-control" type="number" name="salary_min" placeholder="Min salary" />
+          </div>
+          <div class="col">
+            <input class="form-control" type="number" name="salary_max" placeholder="Max salary" />
+          </div>
+          <div class="col">
+            <input
+              class="form-control"
+              type="date"
+              name="deadline"
+              min="{{ today }}"
+              aria-label="Application deadline"
+            />
+          </div>
+        </div>
+        <details class="border rounded p-3 mt-3">
+          <summary>Job skills</summary>
+          {% for skill in skills %}
+            <div class="d-flex flex-wrap align-items-center gap-2 py-2 border-bottom">
+              <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" name="skill_id" value="{{ skill.id }}" /> {{ skill.name }}
+              </label>
+              <select class="form-select form-select-sm w-auto" name="level_{{ skill.id }}" aria-label="{{ skill.name }} minimum level">
+                {% for level in proficiencies %}<option value="{{ level }}" {% if level == 'intermediate' %}selected{% endif %}>{{ level|title }}</option>{% endfor %}
+              </select>
+              <label class="form-check-label">
+                <input class="form-check-input" type="checkbox" name="mandatory_{{ skill.id }}" /> Required
+              </label>
+            </div>
+          {% else %}<p class="mb-0">No skills are available in the catalog.</p>{% endfor %}
+        </details>
+        <button class="btn btn-teal mt-3" name="status" value="open">Publish job</button>
+        <button class="btn btn-outline-secondary mt-3" name="status" value="draft">Save draft</button>
+      </form>
+    </div>
+  </div>
+{% endblock %}

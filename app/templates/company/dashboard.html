@@ -1,0 +1,70 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="d-flex justify-content-between">
+      <h1 class="section-title">Recruiter workspace</h1>
+      <a class="btn btn-teal" href="{{ url_for('company.create_company') }}">Add company</a>
+    </div>
+    {% for m in memberships %}
+      <div class="card p-4 my-4">
+        <div class="d-flex justify-content-between">
+          <div>
+            <h3>
+              {{ m.name }}
+              {% if m.is_verified %}
+                <span class="badge bg-success">Verified</span>
+              {% endif %}
+            </h3>
+            <p>{{ m.industry or 'Industry not set' }}</p>
+          </div>
+          <div class="d-flex flex-wrap align-items-start gap-2">
+            <a class="btn btn-outline-secondary" href="{{ url_for('company.company_profile', company_id=m.company_id) }}">View company</a>
+            {% if m.can_manage_company %}<a class="btn btn-outline-secondary" href="{{ url_for('company.edit_company',company_id=m.company_id) }}">Edit</a>{% endif %}
+            <a class="btn btn-teal" href="{{ url_for('company.create_job',company_id=m.company_id) }}">Post a job</a>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Job</th>
+                <th>Status</th>
+                <th>Applicants</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in jobs if job.company_id==m.company_id %}
+                <tr>
+                  <td>{{ job.title }}</td>
+                  <td>{{ job.status }}</td>
+                  <td>{{ job.application_count }}</td>
+                  <td>
+                    <a href="{{ url_for('company.applicants',job_id=job.id) }}">View applicants</a>
+                    {% if job.status in ('open', 'draft') %}
+                      <form class="d-inline" method="post" action="{{ url_for('company.close_job',job_id=job.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button class="btn btn-sm btn-outline-danger">Close</button>
+                      </form>
+                    {% endif %}
+                    {% if not job.application_count %}<form
+                      class="d-inline"
+                      method="post"
+                      action="{{ url_for('company.delete_job',job_id=job.id) }}"
+                    >
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                      <button class="btn btn-sm btn-danger">Delete</button>
+                    </form>{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty">Create a company profile to start recruiting.</div>
+    {% endfor %}
+  </div>
+{% endblock %}

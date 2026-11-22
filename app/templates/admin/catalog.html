@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h1 class="section-title mb-1">Categories & skills</h1>
+        <p class="text-muted mb-0">Select an item to edit its name or details.</p>
+      </div>
+      <a class="btn btn-outline-secondary" href="{{ url_for('admin.dashboard') }}">← Dashboard</a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Categories</h3>
+            <span class="badge bg-secondary">{{ categories|length }}</span>
+          </div>
+
+          <div class="catalog-list">
+            {% for item in categories %}
+              <div class="catalog-item">
+                <button
+                  type="button"
+                  class="catalog-item-name"
+                  title="Edit category"
+                  data-edit-target="category-{{ item.id }}"
+                >
+                  {{ item.name }}
+                </button>
+
+                <form
+                  id="category-{{ item.id }}"
+                  class="catalog-rename-form d-none"
+                  method="post"
+                  action="{{ url_for('admin.rename_catalog_item',kind='category',item_id=item.id) }}"
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input class="form-control form-control-sm" name="name" value="{{ item.name }}" required />
+                  <input class="form-control form-control-sm" name="detail" value="{{ item.description or '' }}" maxlength="255" placeholder="Description" aria-label="Category description" />
+                  <button class="btn btn-sm btn-teal">Save</button>
+                  <button type="button" class="btn btn-sm btn-light catalog-cancel">Cancel</button>
+                </form>
+
+                <form
+                  method="post"
+                  action="{{ url_for('admin.delete_catalog_item',kind='category',item_id=item.id) }}"
+                  data-confirm="Delete {{ item.name }}?"
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            {% else %}
+              <div class="empty">No categories yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card p-4 h-100">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Skills</h3>
+            <span class="badge bg-secondary">{{ skills|length }}</span>
+          </div>
+
+          <div class="catalog-list">
+            {% for item in skills %}
+              <div class="catalog-item">
+                <button
+                  type="button"
+                  class="catalog-item-name"
+                  title="Edit skill"
+                  data-edit-target="skill-{{ item.id }}"
+                >
+                  {{ item.name }}
+                </button>
+
+                <form
+                  id="skill-{{ item.id }}"
+                  class="catalog-rename-form d-none"
+                  method="post"
+                  action="{{ url_for('admin.rename_catalog_item',kind='skill',item_id=item.id) }}"
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <input class="form-control form-control-sm" name="name" value="{{ item.name }}" required />
+                  <input class="form-control form-control-sm" name="detail" value="{{ item.category or '' }}" maxlength="80" placeholder="Skill category" aria-label="Skill category" />
+                  <button class="btn btn-sm btn-teal">Save</button>
+                  <button type="button" class="btn btn-sm btn-light catalog-cancel">Cancel</button>
+                </form>
+
+                <form
+                  method="post"
+                  action="{{ url_for('admin.delete_catalog_item',kind='skill',item_id=item.id) }}"
+                  data-confirm="Delete {{ item.name }}? Its skill links will also be removed."
+                >
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            {% else %}
+              <div class="empty">No skills yet.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-4 mt-4">
+      <h4>Add catalog item</h4>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="input-group">
+          <select class="form-select" name="kind" aria-label="Catalog type">
+            <option value="category">Category</option>
+            <option value="skill">Skill</option>
+          </select>
+          <input class="form-control" name="name" required placeholder="Name" />
+          <input class="form-control" name="detail" maxlength="255" placeholder="Description or skill category (optional)" aria-label="Catalog item details" />
+          <button class="btn btn-teal">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll(".catalog-item-name").forEach((button) => {
+      button.addEventListener("click", () => {
+        const form = document.getElementById(button.dataset.editTarget);
+        button.classList.add("d-none");
+        form.classList.remove("d-none");
+        const input = form.querySelector("input[name='name']");
+        input.focus();
+        input.select();
+      });
+    });
+
+    document.querySelectorAll("form[data-confirm]").forEach((form) => {
+      form.addEventListener("submit", (event) => {
+        if (!window.confirm(form.dataset.confirm)) event.preventDefault();
+      });
+    });
+
+    document.querySelectorAll(".catalog-cancel").forEach((button) => {
+      button.addEventListener("click", () => {
+        const form = button.closest("form");
+        form.classList.add("d-none");
+        form.closest(".catalog-item").querySelector(".catalog-item-name").classList.remove("d-none");
+      });
+    });
+
+    document.querySelectorAll(".catalog-rename-form input").forEach((input) => {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          input.closest("form").querySelector(".catalog-cancel").click();
+        }
+      });
+    });
+  </script>
+{% endblock %}

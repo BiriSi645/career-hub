@@ -1,0 +1,27 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <h1 class="section-title">Job moderation</h1>
+    <div class="card p-4">
+      <table class="table">
+        {% for job in jobs %}
+          <tr>
+            <td>{{ job.title }}</td>
+            <td>{{ job.company_name }}</td>
+            <td>{{ job.status }}</td>
+            <td>
+              <form method="post" action="{{ url_for('admin.moderate_job',job_id=job.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <select name="status">
+                  {% for status in statuses %}<option value="{{ status }}" {% if status == job.status %}selected{% endif %}>{{ status|title }}</option>{% endfor %}
+                </select>
+                <button class="btn btn-sm btn-outline-secondary">Set</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+{% endblock %}

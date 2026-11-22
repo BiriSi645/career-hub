@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="card p-4">
+      <h1 class="section-title">Delete {{ job.title }}?</h1>
+      <p>This permanently removes the posting, its skill requirements, and saved bookmarks. If an application is received before you confirm, the posting is kept and closed instead.</p>
+      <form method="post" action="{{ url_for('company.delete_job', job_id=job.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-danger" name="confirm_delete" value="yes">Permanently delete</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('company.dashboard') }}">Cancel</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}

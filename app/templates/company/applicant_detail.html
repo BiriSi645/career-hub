@@ -1,0 +1,211 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card p-4">
+          <h1 class="section-title">{{ candidate.full_name }}</h1>
+          <p class="mb-1">
+            {{ candidate.headline or 'Job candidate' }}
+          </p>
+          <p class="text-muted">
+            Applied for {{ application.job_title }} on {{ application.applied_at.strftime('%d %b %Y') }}
+            · <span class="badge badge-soft">{{ application.status|title }}</span>
+          </p>
+          <div class="candidate-contact-grid">
+            <div>
+              <small>Email</small>
+              <a href="mailto:{{ candidate.email }}">{{ candidate.email }}</a>
+            </div>
+            <div>
+              <small>Phone</small>
+              {% if candidate.phone %}
+                <a href="tel:{{ candidate.phone }}">{{ candidate.phone }}</a>
+              {% else %}
+                <span class="text-muted">Not provided</span>
+              {% endif %}
+            </div>
+            <div>
+              <small>Location</small>
+              <span>
+                {% if candidate.city or candidate.country %}
+                  {{ candidate.city or '' }}{% if candidate.city and candidate.country %}, {% endif %}{{ candidate.country or '' }}
+                {% else %}
+                  <span class="text-muted">Not provided</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+
+          {% if candidate.bio %}
+            <hr />
+            <h4>Professional summary</h4>
+            <p style="white-space: pre-line">{{ candidate.bio }}</p>
+          {% endif %}
+
+            {% if candidate.linkedin_url|public_http_url or candidate.portfolio_url|public_http_url %}
+            <div class="d-flex flex-wrap gap-2">
+              {% if candidate.linkedin_url|public_http_url %}
+                <a class="btn btn-sm btn-outline-secondary" href="{{ candidate.linkedin_url }}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              {% endif %}
+              {% if candidate.portfolio_url|public_http_url %}
+                <a class="btn btn-sm btn-outline-secondary" href="{{ candidate.portfolio_url }}" target="_blank" rel="noopener noreferrer">Portfolio</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="card p-4 mt-4">
+          <h4>Skills</h4>
+          {% if skills %}
+            <div class="d-flex flex-wrap gap-2">
+              {% for item in skills %}
+                <span class="candidate-skill">
+                  {{ item.skill_name }} · {{ item.proficiency|title }}
+                  {% if item.years_experience %} · {{ item.years_experience }}y{% endif %}
+                </span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">No skills added.</p>
+          {% endif %}
+        </div>
+
+        <div class="card p-4 mt-4">
+          <h4>Experience</h4>
+          {% for item in experiences %}
+            <div class="candidate-timeline-item">
+              <strong>{{ item.title }}</strong>
+              <div>{{ item.company_name }}{% if item.location %} · {{ item.location }}{% endif %}</div>
+              <small class="text-muted">
+                {{ item.start_date.strftime('%b %Y') }} — {{ item.end_date.strftime('%b %Y') if item.end_date else 'Present' }}
+              </small>
+              {% if item.description %}<p class="mb-0 mt-2">{{ item.description }}</p>{% endif %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">No experience added.</p>
+          {% endfor %}
+        </div>
+
+        <div class="card p-4 mt-4">
+          <h4>Education</h4>
+          {% for item in educations %}
+            <div class="candidate-timeline-item">
+              <strong>{{ item.degree }}{% if item.field_of_study %}, {{ item.field_of_study }}{% endif %}</strong>
+              <div>{{ item.institution }}</div>
+              <small class="text-muted">
+                {{ item.start_date.strftime('%b %Y') }} — {{ item.end_date.strftime('%b %Y') if item.end_date else 'Present' }}
+              </small>
+              {% if item.description %}<p class="mb-0 mt-2">{{ item.description }}</p>{% endif %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">No education added.</p>
+          {% endfor %}
+        </div>
+
+        <div class="card p-4 mt-4">
+          <h4>Application materials</h4>
+          <h5 class="mt-2">Cover letter</h5>
+          <p style="white-space: pre-line">{{ application.cover_letter or 'No cover letter provided.' }}</p>
+          <h5>CV</h5>
+          {% if resume %}
+            <a
+              class="btn btn-outline-secondary align-self-start"
+              href="{{ url_for('company.application_resume',application_id=application.id) }}"
+            >Download {{ resume.title }}</a>
+          {% else %}
+            <p class="text-muted mb-0">No CV was attached to this application.</p>
+          {% endif %}
+        </div>
+
+        <div class="card p-4 mt-4">
+          <h4>Status history</h4>
+          {% for h in history %}
+            <div class="candidate-timeline-item">
+              <strong>{{ h.new_status|title }}</strong>
+              <small class="text-muted d-block">{{ h.changed_at.strftime('%d %b %Y %H:%M') }}</small>
+              {% if h.note %}<p class="mb-0 mt-1">{{ h.note }}</p>{% endif %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">No status history.</p>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card p-4">
+          <h4>Update status</h4>
+          {% if available_statuses %}
+            <form method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <select class="form-select mb-2" name="status">
+                {% for status in available_statuses %}
+                  <option value="{{ status }}">{{ status|title }}</option>
+                {% endfor %}
+              </select>
+              <textarea class="form-control mb-2" name="note" placeholder="Status note"></textarea>
+              <button class="btn btn-teal">Update</button>
+            </form>
+          {% elif application.status == 'hired' %}
+            <div class="alert alert-success mb-0">This candidate has been hired.</div>
+          {% else %}
+            <p class="text-muted mb-0">No further status changes are available.</p>
+          {% endif %}
+
+          {% if application.status == 'offered' %}
+            <hr />
+            <div class="hire-candidate-panel">
+              <h4>Hire candidate</h4>
+              <p class="small">This will add the position to the candidate's profile automatically.</p>
+              <form
+                method="post"
+                action="{{ url_for('company.hire_candidate',application_id=application.id) }}"
+                onsubmit="return confirm('Confirm that this candidate has been hired?')"
+              >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <label class="form-label" for="start_date">Employment start date</label>
+                <input class="form-control mb-2" id="start_date" type="date" name="start_date" value="{{ today }}" required />
+                <textarea class="form-control mb-2" name="note" placeholder="Hiring note (optional)"></textarea>
+                <button class="btn btn-success w-100">Hire candidate</button>
+              </form>
+            </div>
+          {% endif %}
+          <hr />
+          <h4>Interviews</h4>
+          {% for interview in interviews %}
+            <div class="border rounded p-2 mb-2">
+              <strong>{{ (interview.scheduled_at|local_time).strftime('%d %b %Y %H:%M') }} (Istanbul)</strong>
+              <div>{{ interview.interview_type|title }} · {{ interview.location_or_link }}</div>
+              {% if interview.notes %}<p class="small mb-1">{{ interview.notes }}</p>{% endif %}
+              <form class="d-flex gap-2" method="post" action="{{ url_for('company.update_interview', application_id=application.id, interview_id=interview.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <select class="form-select form-select-sm" name="status" aria-label="Interview status">
+                  {% for status in interview_statuses %}
+                    <option value="{{ status }}" {% if status == interview.status %}selected{% endif %}>{{ status|title }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-sm btn-outline-secondary">Save status</button>
+              </form>
+            </div>
+          {% else %}<p class="small text-muted">No interviews yet.</p>{% endfor %}
+          {% if application.status not in ('hired', 'rejected', 'withdrawn') %}
+          <h5>Schedule interview</h5>
+          <form method="post" action="{{ url_for('company.schedule_interview',application_id=application.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <label class="form-label" for="scheduled_at">Date and time (Istanbul)</label>
+            <input class="form-control mb-2" id="scheduled_at" type="datetime-local" name="scheduled_at" required />
+            <select class="form-select mb-2" name="interview_type">
+              <option>video</option>
+              <option>phone</option>
+              <option>onsite</option>
+            </select>
+            <input class="form-control mb-2" name="location_or_link" placeholder="Location or meeting link" required />
+            <textarea class="form-control mb-2" name="notes" placeholder="Notes"></textarea>
+            <button class="btn btn-outline-secondary">Schedule</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

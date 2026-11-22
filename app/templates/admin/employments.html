@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+      <div>
+        <a href="{{ url_for('admin.dashboard') }}" class="text-muted">← Admin dashboard</a>
+        <h1 class="section-title mt-2 mb-1">Employment overview</h1>
+        <p class="text-muted mb-0">See who works where, their role, profile, and employment history.</p>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="card p-3 h-100"><div class="metric">{{ summary.people }}</div>Current employees</div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card p-3 h-100"><div class="metric">{{ summary.positions }}</div>Current positions</div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card p-3 h-100"><div class="metric">{{ summary.companies }}</div>Workplaces</div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card p-3 h-100"><div class="metric">{{ summary.history }}</div>All records</div>
+      </div>
+    </div>
+
+    <div class="card p-4 mb-4">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-lg-8">
+          <label class="form-label" for="employment-search">Search</label>
+          <input
+            class="form-control"
+            id="employment-search"
+            name="q"
+            value="{{ search }}"
+            placeholder="Employee, email, company, position, or location"
+          />
+        </div>
+        <div class="col-sm-8 col-lg-2">
+          <label class="form-label" for="employment-status">Status</label>
+          <select class="form-select" id="employment-status" name="status">
+            <option value="current" {% if status == 'current' %}selected{% endif %}>Current</option>
+            <option value="past" {% if status == 'past' %}selected{% endif %}>Past</option>
+            <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
+          </select>
+        </div>
+        <div class="col-sm-4 col-lg-2 d-grid">
+          <button class="btn btn-teal">Apply filters</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card p-0 overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 employment-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Professional profile</th>
+              <th>Company & position</th>
+              <th>Employment period</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for employment in employments %}
+              <tr>
+                <td>
+                  <strong>{{ employment.full_name }}</strong><br />
+                  <a href="mailto:{{ employment.email }}">{{ employment.email }}</a><br />
+                  <small>{{ employment.phone or 'No phone' }}</small>
+                </td>
+                <td>
+                  <strong>{{ employment.headline or 'No headline' }}</strong><br />
+                  <small>
+                    {% if employment.city or employment.country %}
+                      {{ employment.city or '' }}{% if employment.city and employment.country %}, {% endif %}{{ employment.country or '' }}
+                    {% else %}
+                      Location not provided
+                    {% endif %}
+                  </small>
+                  {% if employment.skill_names %}
+                    <div class="employment-skills mt-2">
+                      {% for item in employment.skill_names[:4] %}
+                        <span>{{ item }}</span>
+                      {% endfor %}
+                      {% if employment.skill_names|length > 4 %}<span>+{{ employment.skill_names|length - 4 }}</span>{% endif %}
+                    </div>
+                  {% endif %}
+                </td>
+                <td>
+                  <strong>{{ employment.title }}</strong><br />
+                  {{ employment.company_name }}
+                  {% if employment.location %}<br /><small>{{ employment.location }}</small>{% endif %}
+                  {% if employment.description %}<p class="small text-muted mb-0 mt-2">{{ employment.description }}</p>{% endif %}
+                </td>
+                <td>
+                  {{ employment.start_date.strftime('%d %b %Y') }}<br />
+                  <small>to {{ employment.end_date.strftime('%d %b %Y') if employment.end_date else 'Present' }}</small>
+                </td>
+                <td>
+                  {% if not employment.end_date or employment.end_date >= today %}
+                    <span class="badge bg-success">Current</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Past</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="empty">No employment records match these filters.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

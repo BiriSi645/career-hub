@@ -1,0 +1,215 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <h1 class="section-title">Professional profile</h1>
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card p-4">
+          <h4>Personal information</h4>
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="row">
+              <div class="col">
+                <input class="form-control" name="first_name" value="{{ current_user.first_name }}" required />
+              </div>
+              <div class="col">
+                <input class="form-control" name="last_name" value="{{ current_user.last_name }}" required />
+              </div>
+            </div>
+            <input class="form-control mt-2" name="phone" type="tel" maxlength="30" value="{{ current_user.phone or '' }}" placeholder="Phone" aria-label="Phone" />
+            <input
+              class="form-control mt-2"
+              name="headline"
+              value="{{ candidate.headline or '' }}"
+              placeholder="Professional headline"
+            />
+            <textarea class="form-control mt-2" name="bio" placeholder="About you">
+              {{ candidate.bio or '' }}</textarea
+            >
+            <div class="row mt-2">
+              <div class="col">
+                <input
+                  class="form-control"
+                  name="city"
+                  value="{{ candidate.city or '' }}"
+                  placeholder="City"
+                />
+              </div>
+              <div class="col">
+                <input
+                  class="form-control"
+                  name="country"
+                  value="{{ candidate.country or '' }}"
+                  placeholder="Country"
+                />
+              </div>
+            </div>
+            <input
+              class="form-control mt-2"
+              name="linkedin_url"
+              value="{{ candidate.linkedin_url or '' }}"
+              placeholder="LinkedIn URL"
+            />
+            <input
+              class="form-control mt-2"
+              name="portfolio_url"
+              value="{{ candidate.portfolio_url or '' }}"
+              placeholder="Portfolio URL"
+            />
+            <button class="btn btn-teal mt-3">Save profile</button>
+          </form>
+        </div>
+        <div class="card p-4 mt-4">
+          <h4>Education</h4>
+          {% for e in education %}
+            <p><strong>{{ e.degree }}</strong> · {{ e.institution }}</p>
+          {% endfor %}
+          <form method="post" action="{{ url_for('seeker.add_education') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input class="form-control mb-2" name="institution" placeholder="Institution" required />
+            <input class="form-control mb-2" name="degree" placeholder="Degree" required />
+            <input class="form-control mb-2" name="field_of_study" placeholder="Field of study" />
+            <div class="row">
+              <div class="col">
+                <input class="form-control" type="date" name="start_date" required />
+              </div>
+              <div class="col">
+                <input class="form-control" type="date" name="end_date" />
+              </div>
+            </div>
+            <button class="btn btn-outline-secondary mt-2">Add education</button>
+          </form>
+        </div>
+        <div class="card p-4 mt-4">
+          <h4>Experience</h4>
+          {% for e in experience %}
+            <p><strong>{{ e.title }}</strong> · {{ e.company_name }}</p>
+          {% endfor %}
+          <form method="post" action="{{ url_for('seeker.add_experience') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <input class="form-control mb-2" name="company_name" placeholder="Company" required />
+            <input class="form-control mb-2" name="title" placeholder="Title" required />
+            <div class="row">
+              <div class="col">
+                <input class="form-control" type="date" name="start_date" required />
+              </div>
+              <div class="col">
+                <input class="form-control" type="date" name="end_date" />
+              </div>
+            </div>
+            <button class="btn btn-outline-secondary mt-2">Add experience</button>
+          </form>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card p-4">
+          <h4>Skills</h4>
+          <p class="text-muted">Add the skills employers should see on your profile.</p>
+          {% for us in candidate_skills %}
+            <div class="profile-list-item">
+              <span>
+                <strong>{{ us.skill_name }}</strong>
+                · {{ us.proficiency|title }}
+                {% if us.years_experience %}
+                  · {{ us.years_experience }} years
+                {% endif %}
+              </span>
+              <form method="post" action="{{ url_for('seeker.delete_skill',skill_id=us.skill_id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button class="btn btn-sm btn-outline-danger" aria-label="Remove {{ us.skill_name }}">Remove</button>
+              </form>
+            </div>
+          {% else %}
+            <p class="text-muted">You have not added any skills yet.</p>
+          {% endfor %}
+          {% if skills %}
+            <form method="post" action="{{ url_for('seeker.add_skill') }}" class="mt-3">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <label class="form-label" for="skill_id">Skill</label>
+              <select class="form-select mb-2" id="skill_id" name="skill_id" required>
+                <option value="" selected disabled>Choose a skill</option>
+                {% for s in skills %}
+                  <option value="{{ s.id }}">{{ s.name }}</option>
+                {% endfor %}
+              </select>
+              <div class="row g-2">
+                <div class="col-sm-7">
+                  <label class="form-label" for="proficiency">Proficiency</label>
+                  <select class="form-select" id="proficiency" name="proficiency">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate" selected>Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="expert">Expert</option>
+                  </select>
+                </div>
+                <div class="col-sm-5">
+                  <label class="form-label" for="years_experience">Years</label>
+                  <input
+                    class="form-control"
+                    id="years_experience"
+                    name="years_experience"
+                    type="number"
+                    min="0"
+                    max="60"
+                    step="0.5"
+                    value="0"
+                  />
+                </div>
+              </div>
+              <button class="btn btn-teal mt-3">Add skill</button>
+            </form>
+          {% else %}
+            <div class="alert alert-success mb-0 mt-3">All available skills are already on your profile.</div>
+          {% endif %}
+        </div>
+        <div class="card p-4 mt-4">
+          <h4>CVs</h4>
+          <p class="text-muted">Upload a PDF, DOC, or DOCX file (maximum 10 MB).</p>
+          {% for r in resumes %}
+            <div class="profile-list-item align-items-start">
+              <div>
+                <a href="{{ url_for('seeker.resume_file',resume_id=r.id) }}"><strong>{{ r.title }}</strong></a>
+                {% if r.is_primary %}<span class="badge badge-soft ms-1">Primary</span>{% endif %}
+              </div>
+              <div class="d-flex gap-1">
+                {% if not r.is_primary %}
+                  <form method="post" action="{{ url_for('seeker.set_primary_resume',resume_id=r.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button class="btn btn-sm btn-outline-secondary">Make primary</button>
+                  </form>
+                {% endif %}
+                <form method="post" action="{{ url_for('seeker.delete_resume',resume_id=r.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted">No CV uploaded yet.</p>
+          {% endfor %}
+          <form method="post" action="{{ url_for('seeker.add_resume') }}" enctype="multipart/form-data" class="mt-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <label class="form-label" for="resume_title">CV title</label>
+            <input class="form-control mb-2" id="resume_title" name="title" placeholder="e.g. Software Engineer CV" />
+            <label class="form-label" for="resume_file">CV file</label>
+            <small class="text-muted d-block mb-2">PDF, DOC or DOCX. Up to {{ config.RESUME_MAX_BYTES // (1024 * 1024) }} MiB per file.</small>
+            <input
+              class="form-control mb-2"
+              id="resume_file"
+              type="file"
+              name="resume_file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              required
+            />
+            <label class="form-check mb-2">
+              <input class="form-check-input" type="checkbox" name="is_primary" />
+              <span class="form-check-label">Use as primary CV</span>
+            </label>
+            <button class="btn btn-teal">Upload CV</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

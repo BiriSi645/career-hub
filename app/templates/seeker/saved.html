@@ -1,0 +1,27 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container py-5">
+    <h1 class="section-title">Saved jobs</h1>
+    <div class="row g-3 mt-2">
+      {% for s in saved %}
+        <div class="col-md-6">
+          <div class="card p-4">
+            <h4>{{ s.title }}</h4>
+            <p>{{ s.company_name }} · {{ s.location }}</p>
+            <div class="d-flex gap-2">
+              <a class="btn btn-sm btn-teal" href="{{ url_for('main.job_detail',job_id=s.id) }}">View role</a>
+              <form method="post" action="{{ url_for('seeker.save_job',job_id=s.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <input type="hidden" name="return_to" value="saved" />
+                <button class="btn btn-sm btn-outline-danger">Unsave job</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty">You haven't saved any jobs.</div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}

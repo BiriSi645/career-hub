@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% macro employee_table(records, empty_message) %}
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 employment-table">
+      <thead>
+        <tr><th>Employee</th><th>Position</th><th>Contact & skills</th><th>Employment period</th></tr>
+      </thead>
+      <tbody>
+        {% for employment in records %}
+          <tr>
+            <td>
+              <strong>{{ employment.full_name }}</strong><br />
+              <small>{{ employment.headline or 'No professional headline' }}</small>
+            </td>
+            <td>
+              <strong>{{ employment.title }}</strong>
+              {% if employment.location %}<br /><small>{{ employment.location }}</small>{% endif %}
+              {% if employment.description %}<p class="small text-muted mb-0 mt-2">{{ employment.description }}</p>{% endif %}
+            </td>
+            <td>
+              <a href="mailto:{{ employment.email }}">{{ employment.email }}</a><br />
+              <small>{{ employment.phone or 'No phone' }}</small>
+              {% if employment.skill_names %}
+                <div class="employment-skills mt-2">
+                  {% for item in employment.skill_names[:5] %}<span>{{ item }}</span>{% endfor %}
+                </div>
+              {% endif %}
+            </td>
+            <td>
+              {{ employment.start_date.strftime('%d %b %Y') }}<br />
+              <small>to {{ employment.end_date.strftime('%d %b %Y') if employment.end_date else 'Present' }}</small>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="empty">{{ empty_message }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endmacro %}
+
+{% block content %}
+  <div class="container py-5">
+    <a href="{{ url_for('admin.companies') }}" class="text-muted">← Companies</a>
+
+    <div class="card p-4 mt-3">
+      <div class="d-flex flex-wrap justify-content-between gap-3">
+        <div>
+          <h1 class="section-title mb-1">{{ company.name }}</h1>
+          <p class="mb-0">{{ company.industry or 'Industry not specified' }}</p>
+        </div>
+        <span class="badge {{ 'bg-success' if company.is_verified else 'bg-warning text-dark' }} align-self-start">
+          {{ 'Verified' if company.is_verified else 'Pending verification' }}
+        </span>
+      </div>
+      {% if company.description %}<p class="mt-4 mb-0" style="white-space: pre-line">{{ company.description }}</p>{% endif %}
+      <div class="company-detail-grid mt-4">
+        <div><small>Location</small><strong>{{ company.city or 'Not specified' }}{% if company.country %}, {{ company.country }}{% endif %}</strong></div>
+        <div>
+          <small>Website</small>
+          {% if company.website|public_http_url %}<a href="{{ company.website }}" target="_blank" rel="noopener noreferrer">{{ company.website }}</a>{% else %}<strong>Not specified</strong>{% endif %}
+        </div>
+        <div><small>Job postings</small><strong>{{ company.posting_count }}</strong></div>
+        <div><small>Applications</small><strong>{{ application_count }}</strong></div>
+        <div><small>Current employees</small><strong>{{ current_employments|length }}</strong></div>
+      </div>
+    </div>
+
+    <div class="card p-4 mt-4">
+      <h3>Recruiter team</h3>
+      <div class="row g-3">
+        {% for membership in staff %}
+          <div class="col-md-6">
+            <div class="profile-list-item mb-0">
+              <div><strong>{{ membership.full_name }}</strong><br /><small>{{ membership.email }}</small></div>
+              <span class="badge badge-soft">{{ membership.title or 'Recruiter' }}</span>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No recruiter assigned.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card p-0 mt-4 overflow-hidden">
+      <div class="p-4 pb-2">
+        <h3>Current employees <span class="badge bg-success">{{ current_employments|length }}</span></h3>
+        <p class="text-muted">People currently working at {{ company.name }}.</p>
+      </div>
+      {{ employee_table(current_employments, 'No current employees are linked to this company.') }}
+    </div>
+
+    <div class="card p-0 mt-4 overflow-hidden">
+      <div class="p-4 pb-2">
+        <h3>Past employees <span class="badge bg-secondary">{{ past_employments|length }}</span></h3>
+      </div>
+      {{ employee_table(past_employments, 'No past employees are linked to this company.') }}
+    </div>
+  </div>
+{% endblock %}
