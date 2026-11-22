@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from ssl import get_default_verify_paths
 
 from flask import current_app, g
 import psycopg
@@ -10,11 +11,15 @@ def get_db():
     if "postgres_connection" not in g:
         url = current_app.config["DATABASE_URL"]
         options = {"row_factory": namedtuple_row, "connect_timeout": 5}
-        if current_app.config["ON_VERCEL"]:
-            settings = conninfo_to_dict(url)
-            options.update(sslmode="verify-full", sslrootcert=settings.get("sslrootcert", "system"),
-                           prepare_threshold=None)
-        elif "-pooler." in conninfo_to_dict(url).get("host", ""):
+        settings = conninfo_to_dict(url)
+        host = settings.get("host", "")
+        on_vercel = current_app.config["ON_VERCEL"]
+        if on_vercel or host.endswith(".neon.tech"):
+            root_cert = settings.get("sslrootcert", "system")
+            if root_cert == "system":
+                root_cert = get_default_verify_paths().cafile or "system"
+            options.update(sslmode="verify-full", sslrootcert=root_cert)
+        if on_vercel or "-pooler." in host:
             options["prepare_threshold"] = None
         g.postgres_connection = psycopg.connect(url, **options)
     return g.postgres_connection
