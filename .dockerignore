@@ -4,4 +4,6 @@
 .venv
 .git
 instance
+.neon
+node_modules
 **/__pycache__

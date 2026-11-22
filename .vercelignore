@@ -3,6 +3,8 @@
 .venv/
 .git/
 instance/
+.neon
+node_modules/
 __pycache__/
 **/__pycache__/
 *.py[cod]

@@ -82,6 +82,8 @@ Remove-Item Env:DATABASE_URL
 
 Run each command after the previous one succeeds. `db upgrade` creates the 19 domain tables on a fresh database and applies pending revisions on an initialized database. Run it again when a deployment includes a schema revision. `seed-catalog` is repeatable and adds roles, job categories and skills. `create-admin` prompts for the first administrator's details and refuses a second administrator. Use the `seed` command only in development to add demo data.
 
+If you use the Neon CLI, run `neon deploy --no-env-pull` and then `neon env pull --services postgres --file .env.local` to preserve the local Docker settings in `.env`. Use the pooled `DATABASE_URL` for requests and `DATABASE_URL_UNPOOLED` for schema commands. With Docker running, `npm run build` builds the Flask development image.
+
 ### CV storage
 
 Vercel stores CV files in Private Blob and their references and primary CV status in Neon. Downloads go through Flask's authenticated candidate and recruiter routes. Vercel uploads are limited to 4 MiB per CV. Local Docker continues to store files under `instance/resumes/`. If you import existing local CV records, transfer the corresponding files and update their references before serving downloads from Vercel.

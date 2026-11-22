@@ -10,3 +10,5 @@ instance/
 htmlcov/
 .coverage
 
+.neon
+node_modules/
